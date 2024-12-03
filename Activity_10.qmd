@@ -1,0 +1,172 @@
+---
+title: "Activity #10"
+subtitle: "STAT 184"
+author: "John Seifarth"
+date: "November 20, 2024"
+format: html
+editor: visual
+self-contained: TRUE
+---
+```{r, echo=FALSE, results=FALSE}
+library(ggplot2)
+library(dplyr)
+library(knitr)
+```
+
+# Question 1
+```{r, echo=FALSE}
+myFunction <- function(x){
+  y <- (cos(4*x) + tan(0.5*x))^4
+  return(y)
+}
+
+ggplot() +
+  stat_function(
+    fun = myFunction,
+    xlim = c(0, 1),
+    n = 1000
+  ) +
+  theme_bw() +
+  labs(
+    x = "x",
+    y = "h(x)"
+  )
+```
+
+# Question 2
+```{r}
+data(diamonds)
+
+ggplot(diamonds) +
+  aes(x = carat, y = price, colour = clarity) +
+  geom_point(shape = "circle open") +
+  scale_color_brewer(palette = "RdYlGn", direction = 1) +
+  labs(
+    x = "Carat Weight",
+    y = "Price",
+    title = "Diamond Price as a Function of Clarity",
+    subtitle = "Colored by Diamond Clarity",
+    color = "GIA Clarity Scale"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "top",
+    axis.text.y = element_text(size = 12L),
+    axis.text.x = element_text(size = 12L)
+  )
+
+```
+
+# Question 3[^1]
+```{r}
+# Loading in the CSV and viewing its head
+tortilla <- read.csv("C:\\Users\\jsei8\\Downloads\\tortilla_data.csv", header = TRUE)
+head(tortilla)
+```
+
+## Question 3.a
+```{r}
+# Filter the tortilla data frame by year
+avg2007 <- tortilla %>%
+  filter(year == 2007) %>%
+  #Calculate the mean and summarize
+  summarize(avgPrice2007 = mean(price))
+
+print(avg2007)
+```
+
+## Question 3.b
+```{r}
+# Filter the tortilla data frame by year
+avg2024 <- tortilla %>%
+  filter(year == 2024) %>%
+  #Calculate the mean and summarize
+  summarize(avgPrice2024 = mean(price))
+
+print(avg2024)
+```
+
+## Question 3.c
+```{r}
+#Pull the averages from respective data frames then subtract
+avgDif <- avg2024$avgPrice2024 - avg2007$avgPrice2007
+print(avgDif)
+```
+
+## Question 3.d
+
+##### Average Price of Tortillas Over Time
+```{r}
+# Group the data by year then calculate average prices
+tortillaAvgs <- tortilla %>%
+  group_by(year) %>%
+  summarize(avgPrice = mean(price))
+
+# Plot the data with X as year and Y as average price
+ggplot(tortillaAvgs) +
+  aes(x = year, y = avgPrice) +
+  geom_point(shape = "circle") +
+  labs(x = "Year", y = "Average Price") +
+  theme_minimal()
+```
+
+## Question 3.e
+```{r, results='asis'}
+# Filtering the data by year and summarizing the average after grouping by state
+stateSummary <- tortilla %>%
+  filter(year == 2016) %>%
+  group_by(state) %>%
+  summarize(price2016 = mean(price))
+```
+
+##### Table of Average Tortilla Prices by State in 2016
+```{r}
+# Creating the table using Knitr package
+kable(stateSummary, col.names = c("State", "Average Price"), digits = 2)
+```
+
+##### Box Plot of 2016 Tortilla Prices By State
+```{r}
+# Sort the data by year
+stateSummaryLong <- tortilla %>%
+  filter(year == 2016)
+
+# Create box plots seperated by state
+ggplot(stateSummaryLong) +
+  aes(x = state, y = price) +
+  geom_boxplot(fill = "#91A9D2") +
+  labs(
+    x = "State",
+    y = "Price",
+    caption = "Data only collected in states bordering the USA"
+  ) +
+  theme_minimal()
+```
+
+## Question 3.f
+
+##### Box Plots of Store Type in Neuvo Leon From 2007 - 2024
+```{r}
+# Filter data by state Nuevo Leon
+stateSummaryNuevoLeon <- tortilla %>%
+  filter(state == "NuevoLeon")
+
+# Create box plots faceted by year
+ggplot(stateSummaryNuevoLeon) +
+ aes(x = storeType, y = price) +
+ geom_boxplot(fill = "#8AB0F2") +
+ labs(x = "Store Type", 
+ y = "Price") +
+ theme_minimal() +
+ facet_wrap(vars(year)) +
+  # Rotating x axis by 90 degrees
+  theme(axis.text.x = element_text(angle = 90))
+```
+From these box plots, we can deduce that the difference in price between Mom and Pop stores and Large Retail gets greater over time. They may still be proportional to each other because the overall prices rise, but the difference appears to grow.
+
+## Question 3.g
+![Accessed from thecafesucrefarine.com on 11/20/24](Flour-Tortillas.jpg)
+
+## Question 3.h
+
+[^1]: Rick Chavelas via Kaggle at https://www.kaggle.com/datasets/richave/tortilla-prices-in-mexico
